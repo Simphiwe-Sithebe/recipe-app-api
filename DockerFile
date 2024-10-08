@@ -1,0 +1,32 @@
+#name of the base image that we'll be building on top of
+FROM python:3.9-alpine3.13
+#Defining the maintainer
+LABEL maintainer="simz"
+
+#tells python that the output shouldn't be buffered butprinted on the console, preventing any delays
+
+ENV PYTHONBUFFERED 1
+
+#Copy requirements file from our local machine into docker image
+COPY ./requirements.txt /tmp/requirements.txt
+#Copy django directory(app) into a directory called app in the container
+COPY ./app /app
+#Set working directory that our commands will be run from, set to the location that our django project will be synced to
+WORKDIR /app
+#Exposes port 8000 from container to machine
+EXPOSE 8000
+
+#This runs a command on the alpine image that we are using
+
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    /py/bin/pip install -r/tmp/requirements.txt && \
+    rm -rf /tmp && \
+    adduser \
+    --disabled-password\
+    --no-create-home \
+    django-user
+
+ENV PATH="/py/bin:$PATH"
+
+USER django-user
